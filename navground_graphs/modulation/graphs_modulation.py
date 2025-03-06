@@ -45,6 +45,7 @@ class GraphsModulation(core.BehaviorModulation, name="Graphs"):
                     closest_region = region
         if closest_region:
             if closest_region.contains(Point(behavior.position)):  # Check if the agent is inside the region
+                behavior.state = 1
                 pass
             else:  # The agent is approaching the region
                 if behavior.ahead:
@@ -57,20 +58,8 @@ class GraphsModulation(core.BehaviorModulation, name="Graphs"):
                         o_timetoenter = [safe_division(closest_region.distance(Point(o.position)), 
                                                        np.linalg.norm(o.velocity)) for o in behavior.ahead]
                         if b_timetoenter > min(o_timetoenter):  # Opponent arrives first
-                            if closest_region.distance(Point(behavior.position)) < 4 * behavior.radius + 2 * behavior.safety_margin:
-                                behavior.optimal_speed = 0
-                                behavior.state = 1
-                            else:
-                                behavior.optimal_speed = 0
-                                behavior.state = 1
-                                # region_to_avoid = closest_region.buffer(4 * behavior.radius + 2 * behavior.safety_margin, quad_segs=3)
-                                # exterior_coords = np.array(region_to_avoid.exterior.coords)
-                                # for i in range(len(exterior_coords)):
-                                #     self.extra_lines += 1
-                                #     behavior.environment_state.line_obstacles += [
-                                #         core.LineSegment(exterior_coords[i - 1], exterior_coords[i])
-                                #     ]
-                                # behavior.state = 1
+                            behavior.optimal_speed = 0
+                            behavior.state = 1
                         else:  # Agent enters first
                             pass  # No changes needed, agent can proceed
                     else:
@@ -79,40 +68,7 @@ class GraphsModulation(core.BehaviorModulation, name="Graphs"):
                     pass  # No opponents ahead
 
                 pass  # Agent is not approaching the narrow area
-        #################
-        # for region in behavior.narrow_area:
-        #     if region.contains(Point(behavior.position)): #Is the agent inside the narrow area?
-        #         behavior.state = 0
-        #         continue #Agents inside the narrow area do not need modulation
-        #     elif region.intersects(behavior.projection): #Is the agent approaching the narrow area?
-        #         if behavior.ahead:
-        #             if any([region.contains(Point(o.position)) for o in behavior.ahead]): #Is there any agent inside the narrow area?
-        #                 behavior.optimal_speed = 0 #In that case, I should stop
-        #                 behavior.state = 0
-        #             elif any([region.intersects(trajectory_projection_2(o.position,l,o.velocity)) for o in behavior.ahead]): 
-        #                 b_timetoenter = safe_division(region.distance(Point(behavior.position)),np.linalg.norm(behavior.velocity))
-        #                 o_timetoenter = [safe_division(region.distance(Point(o.position)),np.linalg.norm(o.velocity)) for o in behavior.ahead]
-        #                 if b_timetoenter > min(o_timetoenter): #Is there any opposite arriving before the agent?
-        #                     if region.distance(Point(behavior.position)) < 4*behavior.radius+2*behavior.safety_margin:
-        #                         behavior.optimal_speed = 0
-        #                         behavior.state = 0
-        #                     else:
-        #                         behavior.optimal_speed = 0
-        #                         behavior.state = 0
-        #                         region_to_avoid = region.buffer(4*behavior.radius+2*behavior.safety_margin,quad_segs=3)
-        #                         exterior_coords = np.array(region_to_avoid.exterior.coords)
-        #                         for i in range (len(exterior_coords)):
-        #                             self.extra_lines += 1
-        #                             behavior.environment_state.line_obstacles += [core.LineSegment(exterior_coords[i-1],exterior_coords[i])]
-        #                 else: #The agent will enter the narrow area first
-        #                     continue
-        #             else:
-        #                 continue #There isn't an opponent approaching the narrow area
-        #         else:
-        #             continue #There aren't opponents ahead
-        #     else: 
-        #         continue #Agents that are not approaching the narrow area do not need modulation
-
+                
         if behavior.state == 0:
             behavior.same_dictionary = same_dic(behavior.position,behavior.radius,behavior.same_flow)
             behavior.PAG, behavior.same_flow, behavior.same_dictionary = PA_graph(behavior.same_dictionary, behavior.same_flow,
